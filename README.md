@@ -11,17 +11,17 @@
 | Topics                                                                       | Name |
 |:----------------------------------------------------------------------------:|:----:|
 | Image Processing, Feature Detection, Description, and Matching, Optical Flow | Daniel |
-|:----------------------------------------------------------------------------:|:----:|
+
 | Multiple View Geometry: Disparity, Calibration, Fundamental Matrix Essential Matrix, 3D * Reconstruction
-|:----------------------------------------------------------------------------:|:----:|
+
 | 3D Point Cloud Processing: Registration, Regression, Clustering              |      |
-|:----------------------------------------------------------------------------:|:----:|
+
 | State Estimation: Kalman Filter                                              |      |
-|:----------------------------------------------------------------------------:|:----:|
+
 | Classification                                                               |      |
-|:----------------------------------------------------------------------------:|:----:|
+
 | Visual Odometry, Motion Estimation                                           |      |
-|:----------------------------------------------------------------------------:|:----:|
+
 
 ### Run the program
 
