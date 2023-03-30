@@ -13,7 +13,7 @@
 * Multiple View Geometry: Disparity, Calibration, Fundamental Matrix Essential Matrix, 3D * Reconstruction --->
 * 3D Point Cloud Processing: Registration, Regression, Clustering --->
 * State Estimation: Kalman Filter --->
-* Classification ---> 
+* Classification ---> Navaneeth
 * Visual Odometry, Motion Estimation --->
 
 ### Run the program
