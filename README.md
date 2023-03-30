@@ -8,8 +8,8 @@
 
 
 ### Project distribution
-|:--------------------------------------------------------------------------------------------------------:|:-------:|
-| Topics                                                                                                   |   Name  |
+
+| <div style="text-align: center"> Topics </div>                                                                                                   |   Name  |
 |:-------------------------------------------------------------------------------------------------------- |:-------:|
 | Image Processing, Feature Detection, Description, and Matching, Optical Flow                             | Daniel |
 | Multiple View Geometry: Disparity, Calibration, Fundamental Matrix Essential Matrix, 3D * Reconstruction |         |
