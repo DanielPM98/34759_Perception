@@ -16,7 +16,7 @@ This project targets an autonomous driving scenario under an intelligent autonom
 | Image Processing, Feature Detection, Description, and Matching, Optical Flow                             |  Daniel   |
 | Multiple View Geometry: Disparity, Calibration, Fundamental Matrix Essential Matrix, 3D * Reconstruction |           |
 | 3D Point Cloud Processing: Registration, Regression, Clustering                                          |Subramanya |
-| State Estimation: Kalman Filter                                                                          |           |
+| State Estimation: Kalman Filter                                                                          | Tianyu    |
 | Classification                                                                                           | Navaneeth |
 | Visual Odometry, Motion Estimation                                                                       |           |
 
