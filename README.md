@@ -18,7 +18,7 @@ This project targets an autonomous driving scenario under an intelligent autonom
 | 3D Point Cloud Processing: Registration, Regression, Clustering                                          |Subramanya |
 | State Estimation: Kalman Filter                                                                          | Tianyu    |
 | Classification                                                                                           | Navaneeth |
-| Visual Odometry, Motion Estimation                                                                       |           |
+| Visual Odometry, Motion Estimation                                                                       |  Medhavi  |
 
 
 
