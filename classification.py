@@ -1,3 +1,4 @@
+import torch
 from ultralytics import YOLO
 
 class Classifier:
@@ -9,10 +10,24 @@ class Classifier:
         else:
             self.weights = 'weights/yolo8n.' + format # Standard weights for detection training
 
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
         self.model = YOLO(self.weights, task='detect')
+        self.model.fuse()
 
     def predict(self, image):
         results = self.model(image, classes=[0,1,2])
         
         return results
+    
 
+    def train(self, yaml_file, **kwargs):
+        results = self.model.train(data=yaml_file, **kwargs)
+
+        return results
+    
+
+    def val(self):
+        try:
+            self.model.val()
+        except Exception as e: raise e
