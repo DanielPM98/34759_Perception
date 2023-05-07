@@ -75,7 +75,6 @@ def ious(atlbrs, btlbrs):
     Compute cost based on IoU
     :type atlbrs: list[tlbr] | np.ndarray
     :type atlbrs: list[tlbr] | np.ndarray
-
     :rtype ious np.ndarray
     """
     ious = np.zeros((len(atlbrs), len(btlbrs)), dtype=np.float32)
@@ -91,7 +90,6 @@ def iou_distance(atracks, btracks):
     Compute cost based on IoU
     :type atracks: list[STrack]
     :type btracks: list[STrack]
-
     :rtype cost_matrix np.ndarray
     """
 
@@ -111,7 +109,6 @@ def v_iou_distance(atracks, btracks):
     Compute cost based on IoU
     :type atracks: list[STrack]
     :type btracks: list[STrack]
-
     :rtype cost_matrix np.ndarray
     """
 
@@ -199,18 +196,15 @@ def fuse_score(cost_matrix, detections):
 def bbox_ious(box1, box2, eps=1e-7):
     """
     Calculate the Intersection over Union (IoU) between pairs of bounding boxes.
-
     Args:
         box1 (np.array): A numpy array of shape (n, 4) representing 'n' bounding boxes.
                          Each row is in the format (x1, y1, x2, y2).
         box2 (np.array): A numpy array of shape (m, 4) representing 'm' bounding boxes.
                          Each row is in the format (x1, y1, x2, y2).
         eps (float, optional): A small constant to prevent division by zero. Defaults to 1e-7.
-
     Returns:
         (np.array): A numpy array of shape (n, m) representing the IoU scores for each pair
                     of bounding boxes from box1 and box2.
-
     Note:
         The bounding box coordinates are expected to be in the format (x1, y1, x2, y2).
     """

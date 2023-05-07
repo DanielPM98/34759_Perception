@@ -12,7 +12,7 @@ class Classifier:
         self.model = YOLO(self.weights, task='detect')
 
     def predict(self, image):
-        results = self.model(image)
+        results = self.model(image, classes=[0,1,2])
         
         return results
 

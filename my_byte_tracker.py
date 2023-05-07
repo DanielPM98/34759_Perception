@@ -183,8 +183,7 @@ class BYTETracker:
          
     def update(self, results, depth, img=None):
         """Updates object tracker with new detections and returns tracked object bounding boxes."""
-        
-        print("in update")
+
         self.frame_id += 1
         activated_starcks = []
         refind_stracks = []
@@ -195,12 +194,11 @@ class BYTETracker:
         bboxes = results.xyxy
         
         depths = []
-        
         for i in range(len(bboxes)):
-            depths.append(depth[int((bboxes[i][1] + bboxes[i][3])/2)][int((bboxes[i][0] + bboxes[i][2])/2)])            
-        # Add index
+            depths.append(depth[int((bboxes[i][1] + bboxes[i][3])/2)][int((bboxes[i][0] + bboxes[i][2])/2)]) 
+           
+        # Add  depth and index 
         bboxes = np.concatenate([bboxes[:, 0:2], np.array(depths).reshape(-1, 1), bboxes[:, 2:4], np.arange(len(bboxes)).reshape(-1, 1)], axis=-1)
-        print(bboxes)
         cls = results.cls
 
         remain_inds = scores > self.args.track_high_thresh
@@ -214,7 +212,6 @@ class BYTETracker:
         scores_second = scores[inds_second]
         cls_keep = cls[remain_inds]
         cls_second = cls[inds_second]
-        print("Dets")
         
         detections = self.init_track(dets, scores_keep, cls_keep, img)
         
@@ -269,9 +266,9 @@ class BYTETracker:
         for it in u_track:
             track = r_tracked_stracks[it]
             if track.state != TrackState.Lost:
-                print(it)
                 track.mark_lost()
                 lost_stracks.append(track)
+
         # Deal with unconfirmed tracks, usually tracks with only one beginning frame
         detections = [detections[i] for i in u_detection]
         dists = self.get_dists(unconfirmed, detections)
@@ -290,7 +287,7 @@ class BYTETracker:
             track = detections[inew]
             if track.score < self.args.new_track_thresh:
                 continue
-            print(track)
+
             track.activate(self.kalman_filter, self.frame_id)
             activated_starcks.append(track)
         # Step 5: Update state
@@ -298,7 +295,6 @@ class BYTETracker:
             if self.frame_id - track.end_frame > self.max_time_lost:
                 track.mark_removed()
                 removed_stracks.append(track)
-                print("test")
 
         self.tracked_stracks = [t for t in self.tracked_stracks if t.state == TrackState.Tracked]
         self.tracked_stracks = self.joint_stracks(self.tracked_stracks, activated_starcks)

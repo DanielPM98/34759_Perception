@@ -1,11 +1,10 @@
-from my_byte_tracker import BYTETracker, STrack
-from onemetric.cv.utils.iou import box_iou_batch
-from dataclasses import dataclass
-    
-from ultralytics import YOLO
-import glob
-import cv2
 from classification import Classifier
+from dataclasses import dataclass
+from my_byte_tracker import BYTETracker
+from ultralytics import YOLO
+
+import cv2
+import glob
 import numpy as np
 
 @dataclass(frozen=True)
@@ -22,87 +21,114 @@ class BYTETrackerArgs:
 def get_depth(imgL, imgR):
     imgL = cv2.cvtColor(imgL, cv2.COLOR_BGR2GRAY)
     imgR = cv2.cvtColor(imgR, cv2.COLOR_BGR2GRAY)
+    
     # focal_length = K_02[0][0]
     focal_length = 956.9475
+    
     # b = np.linalg.norm(t_02-t_03)
     b = np.linalg.norm(np.array([0.059896, -0.001367835, 0.004637624 ])-np.array([-0.4756270, 0.005296617, -0.005437198]))
+    
     stereo = cv2.StereoBM_create()
     stereo.setMinDisparity(4)
     stereo.setNumDisparities(128)
     stereo.setBlockSize(21)
     stereo.setSpeckleRange(16)
     stereo.setSpeckleWindowSize(45)
-     # min_disp = 1
-    # stereo.setMinDisparity(min_disp)
-    #stereo.setMinDisparity(2)
-    # stereo.setDisp12MaxDiff(100)
-    # stereo.setUniquenessRatio(50)
-    # stereo.setSpeckleRange(3)
-    # stereo.setSpeckleWindowSize(50)
+    
     disparity = stereo.compute(imgL,imgR)
     disparity[disparity <=0] = 1e-5
-    norm_image = cv2.normalize(disparity, None, alpha = 0, beta = 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-    dst = cv2.GaussianBlur(disparity,(7,7),cv2.BORDER_DEFAULT)
+   
     depth = (b * focal_length)  / disparity
-    
+        
     return depth
 
+def draw_text(img, text1, text2,
+          font=cv2.FONT_HERSHEY_SIMPLEX,
+          pos=(0, 0),
+          font_scale=0.3,
+          font_thickness=1,
+          text_color=(255, 255, 255),
+          text_color_bg=(0,0,255)
+          ):
+    x, y = pos
+    text_size, _ = cv2.getTextSize(text2, font, font_scale, font_thickness)
+    text_w, text_h = text_size
+    cv2.rectangle(img, pos, (x + text_w, y + 2*text_h), text_color_bg, -1)
+    cv2.putText(img, text1, (x,  y + text_h), font, font_scale, text_color, font_thickness, cv2.LINE_AA)
+    cv2.putText(img, text2, (x,  y + 2*text_h), font, font_scale, text_color, font_thickness, cv2.LINE_AA)
 
-img_left = sorted(glob.glob('final_project_2023_rect/seq_02/image_02/data/*.png'))
-img_right = sorted(glob.glob('final_project_2023_rect/seq_02/image_03/data/*.png'))
+    return text_size
 
 
-classifier = Classifier(train_method="coco", format='pt')
-model = YOLO('weights/coco.pt')
+if __name__ == '__main__':
+    # Load images
+    img_left = sorted(glob.glob('final_project_2023_rect/seq_03/image_02/data/*.png'))
+    img_right = sorted(glob.glob('final_project_2023_rect/seq_03/image_03/data/*.png'))
 
-byte_tracker = BYTETracker(BYTETrackerArgs())
-for i in range(0, len(img_left)):
-    frame = cv2.imread(img_left[i])
-    frame_right =  cv2.imread(img_right[i])
-    
-    depth = get_depth(frame, frame_right)
-    #cv2.imshow('Frame', depth)
-    #cv2.waitKey(10000)
-    
-    results = classifier.predict(frame)
-    
-    
-    for i in range(0,len(results[0])):
-        # print(results[0].boxes[i])
-        box = results[0].boxes[i].xywh
-    
-    outputs = byte_tracker.update(results[0].boxes, depth)
-    tracks_boxes = np.array([track for track in outputs], dtype=float)
-    #iou = box_iou_batch(tracks_boxes, results[0].boxes.xyxy)
-    
-    # track2detection = np.argmax(iou, axis=1)
-    
-    # tracker_ids = [None] * len(results[0].boxes)
-    
-    # for tracker_index, detection_index in enumerate(track2detection):
-    #     if iou[tracker_index, detection_index] != 0:
-    #         tracker_ids[detection_index] = outputs[tracker_index].track_id
+    # Load the model and the tracker
+    classifier = Classifier(train_method="coco", format='pt')
+    byte_tracker = BYTETracker(BYTETrackerArgs())
+    model = YOLO('weights/coco.pt')
 
+    CLASS_NAMES_DICT = model.model.names
+
+    result_video = []
     
-    # draw boxes for visualization
-    if len(outputs) > 0:
+    for i in range(0, len(img_left)):
+        frame_left = cv2.imread(img_left[i])
+        frame_right =  cv2.imread(img_right[i])
+        overlay = frame_left.copy()
         
+        # Object detection and classification
+        predicted_result = classifier.predict(frame_left)
         
-        for j, (output) in enumerate(outputs):
+        if len(predicted_result[0].boxes) >= 2:
             
-            print(output)
-            bbox = output[0:5]
-            id = output[5]
-            cls = output[6]
-            conf = output[7]
+            # Compute the depth map 
+            depth = get_depth(frame_left, frame_right)
             
-            frame = cv2.circle(frame, (int((bbox[0] +bbox[3])/2), int((bbox[1] + bbox[4])/2)), 0, (255, 0, 155), 20)
-            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[3]), int(bbox[4])), (0, 0, 255), 2)
+            # Track the position by applying Kalman Filter
+            updated_result = byte_tracker.update(predicted_result[0].boxes, depth)
             
-            frame = cv2.putText(frame, str(id) + " " + str(bbox[2]), (int(bbox[0]), int(bbox[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 1, cv2.LINE_AA)
-    cv2.imshow('Frame', frame)
-    cv2.waitKey(500)
+            # Draw boxes for visualization
+            if len(updated_result) > 0:
+                
+                for j, (result) in enumerate(updated_result):
+                    
+                    # Get parameters
+                    bbox = result[0:5]
+                    id = result[5]
+                    score = result[6]
+                    cls = result[7]
+                    
+                    text1 =  str(int(id))+ ", " + CLASS_NAMES_DICT[cls]
+                    text2 = f"{bbox[0]:.2f}, " + f"{bbox[1]:.2f}, " + f"{bbox[2]:.2f}"
+                    
+                    # Draw the center of the object, the rectangle and add text
+                    frame_left = cv2.circle(frame_left, (int((bbox[0] +bbox[3])/2), int((bbox[1] + bbox[4])/2)), 0, (255, 0, 155), 20)
+                    cv2.rectangle(overlay, (int(bbox[0]), int(bbox[1])), (int(bbox[3]), int(bbox[4])), (0, 0, 255), 2)
+                    draw_text(overlay, text1, text2, pos=(int(bbox[0]), int(bbox[1])), font_scale=0.4)
+                    
+                    # Transparency factor.
+                    alpha = 0.6  
+                    # Following line overlays transparent rectangle over the image
+                    image_new = cv2.addWeighted(overlay, alpha, frame_left, 1 - alpha, 0)
+                  
+        h, w, _ = image_new.shape
+        
+        # Add new frame to video
+        result_video.append(image_new)
+        #cv2.imshow('Frame', image_new)
+        #cv2.waitKey(500)
+            
+    # cv2.destroyAllWindows() 
     
-cv2.destroyAllWindows()  
+    # Write all processed images into a video
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out =cv2.VideoWriter('out.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 3, (w,h)) 
 
-            
+    for i in range(len(result_video)):
+        out.write(result_video[i])
+        
+    out.release()
+                    
