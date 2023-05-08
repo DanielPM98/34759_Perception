@@ -1,0 +1,10 @@
+path: './custom/'
+train: 'training/images'
+val: 'val/images'
+test: 'testing/images'
+
+names:
+  0: 'Pedestrian'
+  1: 'Cyclist'
+  2: 'Car'
+  
