@@ -1,0 +1,5 @@
+lap==0.4.0
+numpy==1.19.5
+scipy==1.10.1
+torch==2.0.0
+ultralytics==8.0.94
